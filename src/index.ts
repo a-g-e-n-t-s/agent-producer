@@ -30,7 +30,7 @@
  * @license MIT
  */
 
-import {BaseAgent, loadVaultCredentials, readConfig, setLogLevel, setAgentTag, logger, timer} from 'agents-library';
+import {BaseAgent, loadVaultCredentials, readConfig, setLogLevel, setAgentTag, logger, timer, loadDirective} from 'agents-library';
 import type {BaseAgentConfig} from 'agents-library';
 import {registerAllTools, injectOrchestrator} from './tools/index.js';
 import {subscribeToTaskRejections} from './tools/task-execution.js';
@@ -207,6 +207,19 @@ async function main(): Promise<void> {
 
         // Step 2: Connect to broker
         await baseAgent.connect(vault);
+
+        // Step 2.5: Load directive
+        try {
+            const toolNames = client.readAgentJson().tools.map((t: any) => t.name);
+            const directive = await loadDirective(process.cwd(), { tools: toolNames, agentId });
+            if (directive) {
+                logger.info(agentId, `Loaded directive (${directive.length} chars): ${directive.trim().split('\n').find((l: string) => l.trim())?.trim().slice(0, 80)}`, timer.elapsed('main'));
+            } else {
+                logger.debug(agentId, 'No directive found', timer.elapsed('main'));
+            }
+        } catch (err: any) {
+            logger.warn(agentId, `Directive load failed (non-fatal): ${err.message}`, timer.elapsed('main'));
+        }
 
         // Step 3: Initialize LLM-dependent services
         if (llmEnabled && baseAgent.providerManager) {
