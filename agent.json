@@ -1,7 +1,7 @@
 {
   "name": "agent-producer",
   "type": "agent",
-  "version": "0.3.22",
+  "version": "0.3.24",
   "entrypoint": "dist/index.js",
   "scripts": {
     "setup": "npm run build",
@@ -41,7 +41,7 @@
       "engine": "podman",
       "services": {
         "app": {
-          "image": "agent-producer:0.3.22",
+          "image": "agent-producer:0.3.24",
           "command": [
             "sh",
             "-c",
@@ -103,7 +103,7 @@
   },
   "abilities": {
     "secret-ability": "*",
-    "ability-log": "^0.1.2"
+    "ability-log": "^0.1.5"
   },
   "brokers": {
     "remote": "wss://broker.dadavidtseng.com/kadi"
