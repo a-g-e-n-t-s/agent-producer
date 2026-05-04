@@ -1,7 +1,7 @@
 {
   "name": "agent-producer",
   "type": "agent",
-  "version": "0.3.24",
+  "version": "0.3.25",
   "entrypoint": "dist/index.js",
   "scripts": {
     "setup": "npm run build",
@@ -41,7 +41,7 @@
       "engine": "podman",
       "services": {
         "app": {
-          "image": "agent-producer:0.3.24",
+          "image": "agent-producer:0.3.25",
           "command": [
             "sh",
             "-c",

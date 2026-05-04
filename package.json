@@ -1,6 +1,6 @@
 {
   "name": "agent-producer",
-  "version": "0.3.24",
+  "version": "0.3.25",
   "description": "Agent orchestrator - KĀDI agent for coordinating worker agents via KĀDI protocol",
   "type": "module",
   "main": "dist/index.js",
@@ -26,7 +26,7 @@
     "@anthropic-ai/sdk": "^0.32.1",
     "@kadi.build/core": "latest",
     "@modelcontextprotocol/sdk": "1.26.0",
-    "agents-library": "latest",
+    "agents-library": "^0.1.14",
     "zod": "^4.1.5"
   },
   "devDependencies": {
