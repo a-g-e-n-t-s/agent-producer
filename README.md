@@ -100,7 +100,7 @@ Environment variables (overrides):
 - (Vault-provided) ARCADE_USERNAME, ARCADE_PASSWORD — ArcadeDB credentials (kept secret)
 
 Relevant files / paths:
-- agent.json — agent metadata, scripts, build & deploy settings (see updated build/deploy for secret vaults and Akash command)
+- agent.json — agent metadata, scripts, build & deploy settings (see updated build/deploy for secret vaults and Akash command). Note: agent.json package version and Akash image tag are 0.3.25 in the source.
 - config.toml — agent configuration (non-secret)
 - secrets.toml — (encrypted) secrets file; use vault for production
 - .env — optional local overrides
@@ -130,22 +130,4 @@ High-level components and data flow:
   - agent-producer relays status updates back to human channels (Slack, Discord) and to the originator (Claude Code/Desktop).
 
 - Multi-broker support
-  - Primary broker is selected from [broker.local] (preferred for dev) or [broker.remote] via config.toml or the KADI_BROKER_URL_LOCAL / KADI_BROKER_URL_REMOTE env vars.
-  - If both local and remote brokers are configured, the non-primary broker is registered as an additional broker.
-
-- Tool lifecycle
-  - Some tools are immediate/one-shot (e.g., list_tools). Others are stateful and interact with quest/task lifecycles managed by upstream task manager components.
-
-Deployment notes:
-- agent.json includes a build stanza (base image node:20-alpine) and an Akash deploy configuration that exposes port 3000, sets NODE_ENV=production, and declares required secrets and resource requests.
-- The build now runs kadi install kadi-secret and kadi install as part of the container build flow.
-- The Akash service command fetches secrets from configured vaults before starting:
-  "kadi secret receive --vault anthropic --vault model-manager --vault arcadedb && kadi run start"
-- When deploying to KADI/Akash, ensure vaults provide required secrets (ANTHROPIC_API_KEY, MODEL_MANAGER_API_KEY, MODEL_MANAGER_BASE_URL, ARCADE_USERNAME, ARCADE_PASSWORD) and delivery is configured via the broker.
-
-Development
------------
-Useful npm scripts (defined in agent.json):
-- `npm run setup` — run the build (setup delegates to the build step)
-  - script: "npm run build"
-- `npm start` — run
+  - Primary broker is selected from [broker.local] (preferred for dev) or [broker.remote] via config.toml or the KADI_BROKER_URL_LOCAL / KADI_BROKER_URL
