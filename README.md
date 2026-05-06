@@ -146,55 +146,6 @@ Deployment notes:
 Development
 -----------
 Useful npm scripts (defined in agent.json):
-- `npm run setup` — transpile TypeScript (npx tsc)
-- `npm start` — run compiled build: node dist/index.js
-- `npm run dev` — run in watch mode (npx tsx watch src/index.ts)
-- `npm run build` — compile TypeScript (npx tsc)
-- `npm run type-check` — run tsc without emitting
-- `npm run lint` — run ESLint on src
-- `npm run test` — run tests (vitest)
-- `npm run clean` — remove node_modules, dist, and lock files
-
-Build container image (as configured in agent.json.build.default):
-- Steps performed by the build:
-  - npm ci --include=dev
-  - kadi install kadi-secret
-  - kadi install
-  - npx tsc
-  - npm prune --omit=dev
-- Base image: node:20-alpine
-
-Local debugging tips:
-- Use `npm run dev` to get hot-reload behavior via tsx.
-- Provide environment variables locally via .env or by exporting before starting:
-  - export KADI_BROKER_URL_REMOTE="wss://broker.dadavidtseng.com/kadi"
-  - export ANTHROPIC_API_KEY="sk-..."
-  - export MODEL_MANAGER_API_KEY="..."
-- To inspect memory, view files under ./data/memory.
-
-References in source:
-- Main bootstrap: src/index.ts (registers tools, loads config, loads vault credentials)
-- Tool registration entrypoint: ./tools/index.js
-- Tool schemas referenced in src/index.ts: plan-task.js, list-tasks.js, task-status.js, assign-task.js
-
-If you need example tool implementations, a deployment manifest for Akash, or a walkthrough for enabling LLM features (Model Manager primary + Anthropic fallback), tell me which part you want expanded and I will add targeted instructions.
-
-## Quick Start
-
-```bash
-cd agent-producer
-npm install
-kadi install
-kadi run start
-```
-
-## Tools
-
-<!-- Tools listed above in the Tools section -->
-
-## Configuration
-
-### agent.json
-
-See agent.json in the repository for the canonical build and deploy settings (version 0.3.25 as of this source). Notable fields:
-- entrypoint: dist/index.js
+- `npm run setup` — run the build (setup delegates to the build step)
+  - script: "npm run build"
+- `npm start` — run
