@@ -16,7 +16,7 @@ LEVEL = "debug"
 #NETWORKS = ["chatbot", "quest","producer", "file", "global"]
 
 [broker.remote]
-URL = "wss://broker.dadavidtseng.com/kadi"
+URL = "wss://broker.kadi.build/kadi"
 NETWORKS = ["chatbot", "quest", "producer", "file", "global", "voice-services"]
 
 [bot]
