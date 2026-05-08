@@ -55,7 +55,7 @@ Primary configuration files and fields (match config.toml keys; non-secret setti
   - [logging]
     - LEVEL = "debug"
   - [broker.remote]
-    - URL = "wss://broker.dadavidtseng.com/kadi" — remote broker URL used by the agent (local broker is optional and may be configured as [broker.local] with URL and NETWORKS)
+    - URL = "wss://broker.kadi.build/kadi" — remote broker URL used by the agent (local broker is optional and may be configured as [broker.local] with URL and NETWORKS)
     - NETWORKS = ["chatbot", "quest", "producer", "file", "global", "voice-services"] — networks to join on the remote broker
   - [bot]
     - TOOL_TIMEOUT_MS = 10000 — default per-tool timeout in milliseconds
@@ -130,4 +130,4 @@ High-level components and data flow:
   - agent-producer relays status updates back to human channels (Slack, Discord) and to the originator (Claude Code/Desktop).
 
 - Multi-broker support
-  - Primary broker is selected from [broker.local] (preferred for dev) or [broker.remote] via config.toml or the KADI_BROKER_URL_LOCAL / KADI_BROKER_URL
+  - Primary broker is selected from [broker.local] (preferred for dev) or [broker.remote] via config.toml or the KADI_BROKER_URL_LOCAL / KADI_BROKER_URL_REMOTE environment variables. If both local and remote brokers are provided, the non-primary broker is connected as an additional broker.
