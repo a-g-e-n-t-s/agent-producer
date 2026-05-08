@@ -988,16 +988,18 @@ export class DiscordBot extends BaseBot {
                 return [];
             }
 
-            // Convert broker tools to Anthropic format
-            const networkTools: Anthropic.Tool[] = response.tools.map((tool: { name: string; description?: string; inputSchema?: Record<string, unknown> }) => ({
-                name: tool.name,
-                description: tool.description || '',
-                input_schema: tool.inputSchema as Anthropic.Tool.InputSchema || {
-                    type: 'object',
-                    properties: {},
-                    required: []
-                }
-            }));
+            // Convert broker tools to Anthropic format (sanitize names to match ^[a-zA-Z0-9_-]{1,128}$)
+            const networkTools: Anthropic.Tool[] = response.tools
+                .map((tool: { name: string; description?: string; inputSchema?: Record<string, unknown> }) => ({
+                    name: tool.name.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 128),
+                    description: tool.description || '',
+                    input_schema: tool.inputSchema as Anthropic.Tool.InputSchema || {
+                        type: 'object',
+                        properties: {},
+                        required: []
+                    }
+                }))
+                .filter((t: { name: string }) => t.name.length > 0);
 
             logger.debug(MODULE_DISCORD_BOT, `Discovered ${networkTools.length} network tools from broker`, timer.elapsed('main'));
             return networkTools;
