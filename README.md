@@ -27,6 +27,9 @@ Alternative local development:
 Notes:
 - The agent reads configuration from config.toml (walk-up discovery). Environment variables (.env) take precedence for overrides.
 - Secrets should be stored in your vault/secrets.toml or injected by your deployment (see Configuration section).
+- Container/build behavior: the image build installs the kadi-secret helper during the build (see agent.json build.run). When deployed to Akash the deployed command invokes kadi secret receive to fetch required vault credentials before starting the agent:
+  `kadi secret receive --vault anthropic --vault model-manager --vault arcadedb && kadi run start`
+  This is how the required secrets (see Deploy section) are delivered to the running instance.
 
 Tools
 -----
@@ -54,9 +57,12 @@ Primary configuration files and fields (match config.toml keys; non-secret setti
     - VERSION = "0.3.4"
   - [logging]
     - LEVEL = "debug"
+  - [broker.local]
+    - URL = "wss://broker.dadavidtseng.com/kadi"
+    - NETWORKS = ["chatbot", "quest", "producer", "file", "global", "voice-services"]
   - [broker.remote]
-    - URL = "wss://broker.kadi.build/kadi" — remote broker URL used by the agent (local broker is optional and may be configured as [broker.local] with URL and NETWORKS)
-    - NETWORKS = ["chatbot", "quest", "producer", "file", "global", "voice-services"] — networks to join on the remote broker
+    - URL = "wss://broker.kadi.build/kadi"
+    - NETWORKS = ["chatbot", "quest", "producer", "file", "global", "voice-services"]
   - [bot]
     - TOOL_TIMEOUT_MS = 10000 — default per-tool timeout in milliseconds
   - [bot.slack]
@@ -86,7 +92,12 @@ Primary configuration files and fields (match config.toml keys; non-secret setti
 Secret management:
 - Secrets should be stored in your vault or secrets.toml (encrypted) and NOT committed to git.
 - .env may be used for local overrides (not committed).
-- agent.json deploy.secrets defines vaults and required keys; when deployed to Akash the agent expects secrets delivered via the broker (see agent.json deploy stanza).
+- agent.json deploy.secrets defines vaults and required keys; when deployed to Akash the agent expects secrets delivered via the broker (see agent.json deploy stanza). The Akash deploy command in agent.json explicitly runs:
+  `kadi secret receive --vault anthropic --vault model-manager --vault arcadedb && kadi run start`
+  Required vault keys (per agent.json):
+  - anthropic: ANTHROPIC_API_KEY
+  - model-manager: MODEL_MANAGER_API_KEY, MODEL_MANAGER_BASE_URL
+  - arcadedb: ARCADE_USERNAME, ARCADE_PASSWORD
 
 Environment variables (overrides):
 - KADI_BROKER_URL_LOCAL — override local broker URL (used when [broker.local] is present)
@@ -100,7 +111,7 @@ Environment variables (overrides):
 - (Vault-provided) ARCADE_USERNAME, ARCADE_PASSWORD — ArcadeDB credentials (kept secret)
 
 Relevant files / paths:
-- agent.json — agent metadata, scripts, build & deploy settings (see updated build/deploy for secret vaults and Akash command). Note: agent.json package version and Akash image tag are 0.3.25 in the source.
+- agent.json — agent metadata, scripts, build & deploy settings. Note: build installs kadi-secret during image build and the Akash deploy command fetches vault secrets via `kadi secret receive --vault anthropic --vault model-manager --vault arcadedb` before starting the agent. The agent.json package version and Akash image tag are 0.3.25 in the source.
 - config.toml — agent configuration (non-secret)
 - secrets.toml — (encrypted) secrets file; use vault for production
 - .env — optional local overrides
@@ -114,20 +125,4 @@ High-level components and data flow:
 - BaseAgent (agents-library)
   - KadiClient: connects to one or more KĀDI brokers and registers tools
   - ProviderManager: optional LLM provider (model-manager primary / anthropic fallback) when credentials are configured
-  - MemoryService: persistent memory stored in DATA_PATH (./data/memory)
-  - Graceful shutdown handling for SIGINT/SIGTERM
-
-- Tool registration
-  - registerAllTools (imported from ./tools/index.js) registers each tool (echo, list_tools, quest_approve, etc.) with KadiClient via kadiClient.registerTool()
-
-- Upstream integration
-  - The agent forwards task management to an MCP upstream (mcp-shrimp-task-manager) using kadiClient.load() so existing task managers can handle planning/splitting.
-
-- Event publishing and orchestration
-  - After forwarding or creating tasks, agent-producer publishes events (e.g., `quest.tasks_ready`) to the broker.
-  - agent-lead listens to these events and assigns tasks to worker agents by role.
-  - Workers execute tasks and commit results; agent-lead verifies and publishes verification events (e.g., task.verified).
-  - agent-producer relays status updates back to human channels (Slack, Discord) and to the originator (Claude Code/Desktop).
-
-- Multi-broker support
-  - Primary broker is selected from [broker.local] (preferred for dev) or [broker.remote] via config.toml or the KADI_BROKER_URL_LOCAL / KADI_BROKER_URL_REMOTE environment variables. If both local and remote brokers are provided, the non-primary broker is connected as an additional broker.
+  - MemoryService: persistent memory stored in
